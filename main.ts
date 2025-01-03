@@ -34,23 +34,34 @@ API Calls
 
 */
 
-const fetchWeather = async (city: string) => {
-  const response = await fetch('/api/weather/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ city: city }), // Change cityName to city here
-  });
+const fetchWeather = async (cityName: string) => {
+    try {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=7bbf422e069710e712fbd1dfa94e8628&units=imperial`, {
+            method: 'GET'
+        });
 
+        if (!response.ok) {
+            throw new Error('Weather fetch failed');
+        }
 
+        const weatherData = await response.json();
+        
+        // Process and render weather data
+        renderCurrentWeather({
+            city: weatherData.city.name,
+            date: new Date().toLocaleDateString(),
+            icon: weatherData.list[0].weather[0].icon,
+            iconDescription: weatherData.list[0].weather[0].description,
+            tempF: weatherData.list[0].main.temp,
+            windSpeed: weatherData.list[0].wind.speed,
+            humidity: weatherData.list[0].main.humidity
+        });
 
-  const weatherData = await response.json();
+        renderForecast(weatherData.list.slice(1, 6)); // Next 5 forecasts
 
-  console.log('weatherData', weatherData);
-
-  renderCurrentWeather(weatherData[0]);
-  renderForecast(weatherData.slice(1));
+    } catch (error) {
+        console.error('Error fetching weather:', error);
+    }
 };
 
 const fetchSearchHistory = async () => {
