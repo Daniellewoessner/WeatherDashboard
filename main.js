@@ -19,7 +19,7 @@ API Calls
 const APIKey = "7bbf422e069710e712fbd1dfa94e8628";
 
 const fetchWeather = async (cityName) => {
-    const response = await fetch('/api/weather/', {
+    const response = await fetch('/weather/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ const fetchWeather = async (cityName) => {
     renderForecast(weatherData.slice(1));
 };
 const fetchSearchHistory = async () => {
-    const history = await fetch('/api/weather/history', {
+    const history = await fetch('/history', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ const fetchSearchHistory = async () => {
     return history;
 };
 const deleteCityFromHistory = async (id) => {
-    await fetch(`/api/weather/history/${id}`, {
+    await fetch(`/history/${id}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
