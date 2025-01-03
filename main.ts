@@ -33,36 +33,28 @@ const humidityEl: HTMLParagraphElement = document.getElementById(
 API Calls
 
 */
-const fetchWeather = async (cityName) => {
-    try {
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${7bbf422e069710e712fbd1dfa94e8628}&units=imperial`, {
-            method: 'GET'
-        });
 
-        if (!response.ok) {
-            throw new Error('Weather fetch failed');
-        }
+const fetchWeather = async (city: string) => {
+  const response = await fetch('/api/weather/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ city: city }), // Change cityName to city here
+  });
 
-        const weatherData = await response.json();
-        
-        // Process and render weather data
-        renderCurrentWeather({
-            city: weatherData.name,
-            date: new Date().toLocaleDateString(),
-            icon: weatherData.weather[0].icon,
-            iconDescription: weatherData.weather[0].description,
-            tempF: weatherData.main.temp,
-            windSpeed: weatherData.wind.speed,
-            humidity: weatherData.main.humidity
-        });
 
-    } catch (error) {
-        console.error('Error fetching weather:', error);
-    }
+
+  const weatherData = await response.json();
+
+  console.log('weatherData', weatherData);
+
+  renderCurrentWeather(weatherData[0]);
+  renderForecast(weatherData.slice(1));
 };
 
 const fetchSearchHistory = async () => {
-  const history = await fetch('history', {
+  const history = await fetch('/api/weather/history', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -72,7 +64,7 @@ const fetchSearchHistory = async () => {
 };
 
 const deleteCityFromHistory = async (id: string) => {
-  await fetch(`/history/${id}`, {
+  await fetch(`/api/weather/history/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -285,3 +277,30 @@ const handleSearchFormSubmit = (event: any): void => {
   });
   searchInput.value = '';
 };
+
+const handleSearchHistoryClick = (event: any) => {
+  if (event.target.matches('.history-btn')) {
+    const city = event.target.textContent;
+    fetchWeather(city).then(getAndRenderHistory);
+  }
+};
+
+const handleDeleteHistoryClick = (event: any) => {
+  event.stopPropagation();
+  const cityID = JSON.parse(event.target.getAttribute('data-city')).id;
+  deleteCityFromHistory(cityID).then(getAndRenderHistory);
+};
+
+/*
+
+Initial Render
+
+*/
+
+const getAndRenderHistory = () =>
+  fetchSearchHistory().then(renderSearchHistory);
+
+searchForm?.addEventListener('submit', handleSearchFormSubmit);
+searchHistoryContainer?.addEventListener('click', handleSearchHistoryClick);
+
+getAndRenderHistory();
