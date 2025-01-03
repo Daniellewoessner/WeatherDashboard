@@ -45,6 +45,20 @@ const fetchWeather = async (cityName: string) => {
 
         const weatherData = await response.json();
         
+        // Save to local storage
+        const searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+        const newCity = {
+            name: weatherData.city.name,
+            id: Date.now().toString() // unique identifier
+        };
+
+        // Avoid duplicates
+        const updatedHistory = searchHistory.filter(
+            (city: any) => city.name.toLowerCase() !== newCity.name.toLowerCase()
+        );
+        updatedHistory.push(newCity);
+        localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+        
         // Process and render weather data
         renderCurrentWeather({
             city: weatherData.city.name,
@@ -64,22 +78,15 @@ const fetchWeather = async (cityName: string) => {
 };
 
 const fetchSearchHistory = async () => {
-  const history = await fetch('/api/weather/history', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  return history;
+    // Retrieve search history from localStorage
+    const history = localStorage.getItem('searchHistory');
+    return history ? JSON.parse(history) : [];
 };
 
 const deleteCityFromHistory = async (id: string) => {
-  await fetch(`/api/weather/history/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+    const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+    const updatedHistory = history.filter((city: any) => city.id !== id);
+    localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
 };
 
 /*
@@ -92,19 +99,16 @@ const renderCurrentWeather = (currentWeather: any): void => {
   console.log('Rendering weather data:', currentWeather);
   const { city, date, icon, iconDescription, tempF, windSpeed, humidity } =
     currentWeather;
-    console.log('Destructed values:',{
-      city,
-      date,
-      icon,
-      iconDescription,
-      tempF,
-      windSpeed,
-      humidity
-    });
+  console.log('Destructed values:', {
+    city,
+    date,
+    icon,
+    iconDescription,
+    tempF,
+    windSpeed,
+    humidity
+  });
 
-    //... rest of the function
-
-  // convert the following to typescript
   heading.textContent = `${city} (${date})`;
   weatherIcon.setAttribute(
     'src',
@@ -113,15 +117,15 @@ const renderCurrentWeather = (currentWeather: any): void => {
   weatherIcon.setAttribute('alt', iconDescription);
   weatherIcon.setAttribute('class', 'weather-img');
   heading.append(weatherIcon);
-  tempEl.textContent = `Temp: ${tempF}°C`;
-  windEl.textContent = `Wind: ${windSpeed} m/s`;
+  tempEl.textContent = `Temp: ${tempF}°F`; // Changed from °C to °F
+  windEl.textContent = `Wind: ${windSpeed} MPH`;
   humidityEl.textContent = `Humidity: ${humidity} %`;
-  //..
-};
+
   if (todayContainer) {
     todayContainer.innerHTML = '';
     todayContainer.append(heading, tempEl, windEl, humidityEl);
   }
+};
 
 
 const renderForecast = (forecast: any): void => {
