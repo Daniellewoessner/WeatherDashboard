@@ -1,5 +1,4 @@
-import './jass.css';
-// * All necessary DOM elements selected
+import './jass.css';// * All necessary DOM elements selected
 const searchForm = document.getElementById('search-form');
 const searchInput = document.getElementById('search-input');
 const todayContainer = document.querySelector('#today');
