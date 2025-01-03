@@ -32,11 +32,27 @@ const fetchWeather = async (cityName) => {
     renderForecast(weatherData.slice(1));
 };
 const fetchSearchHistory = async () => {
-    const history = await fetch('/history', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+    try {
+        const response = await fetch('/history', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        // Check if the response is OK
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Parse the JSON response
+        const history = await response.json();
+        return history;
+    } catch (error) {
+        console.error('Error fetching search history:', error);
+        return []; // Return an empty array if there's an error
+    }
+};
     });
     return history;
 };
@@ -98,16 +114,16 @@ const renderForecastCard = (forecast) => {
     }
 };
 const renderSearchHistory = async (searchHistory) => {
-    const historyList = await searchHistory.json();
     if (searchHistoryContainer) {
         searchHistoryContainer.innerHTML = '';
-        if (!historyList.length) {
+        if (!searchHistory || !searchHistory.length) {
             searchHistoryContainer.innerHTML =
                 '<p class="text-center">No Previous Search History</p>';
+            return;
         }
         // * Start at end of history array and count down to show the most recent cities at the top.
-        for (let i = historyList.length - 1; i >= 0; i--) {
-            const historyItem = buildHistoryListItem(historyList[i]);
+        for (let i = searchHistory.length - 1; i >= 0; i--) {
+            const historyItem = buildHistoryListItem(searchHistory[i]);
             searchHistoryContainer.append(historyItem);
         }
     }
@@ -205,7 +221,11 @@ const handleDeleteHistoryClick = (event) => {
 Initial Render
 
 */
-const getAndRenderHistory = () => fetchSearchHistory().then(renderSearchHistory);
-searchForm?.addEventListener('submit', handleSearchFormSubmit);
-searchHistoryContainer?.addEventListener('click', handleSearchHistoryClick);
-getAndRenderHistory();
+const getAndRenderHistory = async () => {
+    try {
+        const history = await fetchSearchHistory();
+        renderSearchHistory(history);
+    } catch (error) {
+        console.error('Error getting and rendering history:', error);
+    }
+};
