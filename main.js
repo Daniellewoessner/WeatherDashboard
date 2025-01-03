@@ -53,7 +53,6 @@ const fetchSearchHistory = async () => {
         return []; // Return an empty array if there's an error
     }
 };
-    });
     return history;
 };
 const deleteCityFromHistory = async (id) => {
