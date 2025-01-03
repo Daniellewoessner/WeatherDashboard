@@ -4,7 +4,7 @@ dotenv.config();
 console.log('API Key loaded:', !!process.env.WEATHER_API_KEY);
 
 // Import the routes
-import routes from './routes/index.js';
+import routes from './index.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -24,13 +24,16 @@ app.use(express.json())
 app.use(urlencoded({extended: true}))
 
 // Static files middleware
-app.use(express.static(`../client/dist`))
+app.use(express.static(`./`))
+
+
 
 
 
 // API routes
-app.use('/api', routes);
-
+app.post('/weather', (req, res) => {
+    // Your weather route logic
+});
 
 
 // 404 handler - must be after all other routes
