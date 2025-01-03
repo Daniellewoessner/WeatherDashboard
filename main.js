@@ -31,37 +31,50 @@ const fetchWeather = async (cityName) => {
     renderCurrentWeather(weatherData[0]);
     renderForecast(weatherData.slice(1));
 };
-const fetchSearchHistory = async () => {
+// Fetch search history from local storage
+const fetchSearchHistory = () => {
     try {
-        const response = await fetch('/history', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        
-        // Check if the response is OK
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        // Parse the JSON response
-        const history = await response.json();
+        // Get history from localStorage, or initialize empty array if none exists
+        const history = JSON.parse(localStorage.getItem('searchHistory')) || [];
         return history;
     } catch (error) {
         console.error('Error fetching search history:', error);
-        return []; // Return an empty array if there's an error
+        return []; // Return empty array if there's an error
     }
 };
-    return history;
+
+// Delete city from local storage
+const deleteCityFromHistory = (cityName) => {
+    try {
+        // Get current history
+        let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
+        // Filter out the city to delete
+        history = history.filter(city => city !== cityName);
+        // Save back to localStorage
+        localStorage.setItem('searchHistory', JSON.stringify(history));
+    } catch (error) {
+        console.error('Error deleting city from history:', error);
+    }
 };
-const deleteCityFromHistory = async (id) => {
-    await fetch(`/history/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+
+// Add a new search to history
+const addToSearchHistory = (cityName) => {
+    try {
+        // Get current history
+        let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
+        // Add new city if it's not already in history
+        if (!history.includes(cityName)) {
+            history.push(cityName);
+            // Keep only the last X searches (e.g., last 5)
+            if (history.length > 5) {
+                history = history.slice(-5);
+            }
+        }
+        // Save back to localStorage
+        localStorage.setItem('searchHistory', JSON.stringify(history));
+    } catch (error) {
+        console.error('Error adding to search history:', error);
+    }
 };
 /*
 
