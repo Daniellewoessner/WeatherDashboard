@@ -1,4 +1,4 @@
-import 'jass.css';
+import './jass.css';
 
 // * All necessary DOM elements selected
 const searchForm: HTMLFormElement = document.getElementById(
